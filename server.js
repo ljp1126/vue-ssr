@@ -5,25 +5,26 @@ const fs = require('fs')
 
 const template = fs.readFileSync('./index.template.html', 'utf-8')
 
-const renderer = require('vue-server-renderer').createRenderer({
-  template
+const serverBundle = require('./dist/vue-ssr-server-bundle.json')
+const clientManifest = require('./dist/vue-ssr-client-manifest.json')
+
+const renderer = require('vue-server-renderer').createBundleRenderer(serverBundle, {
+  template,
+  clientManifest
 })
 
 const server = express()
 
-server.get('/', (req, res) => {
-  const app = new Vue({
-    template: `
-      <div id="app">
-        <h1>{{ message }}</h1>
-      </div>
-    `,
-    data: {
-      message: '你好吗？'
-    }
-  })
+server.use('/dist', express.static('./dist'))
 
-  renderer.renderToString(app, (err, html) => {
+server.get('/', (req, res) => {
+
+  renderer.renderToString({
+    title: '你好吗',
+    meta: `
+      <meta name="description" content="我的学习">
+    `,
+  }, (err, html) => {
     if (err) {
       return res.status(500).end('Internal Server Error.')
     }
