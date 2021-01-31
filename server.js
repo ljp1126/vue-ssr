@@ -38,23 +38,24 @@ if (isProd) {
 
 
 
-const render = (req, res) => {
-
-  renderer.renderToString({
-    title: '你好吗',
-    meta: `
-      <meta name="description" content="我的学习">
-    `,
-  }, (err, html) => {
-    if (err) {
-      return res.status(500).end('Internal Server Error.')
-    }
+const render = async (req, res) => {
+  try {
+    const html = await renderer.renderToString({
+      title: '你好吗',
+      meta: `
+        <meta name="description" content="我的学习">
+      `,
+      url: req.url
+    })
     res.setHeader('Content-Type', 'text/html; charset=utf8')
     res.end(html)
-  })
+  } catch (error) {
+    res.status(500).end('服务端内部错误')
+  }
+  
 }
 
-server.get('/', isProd 
+server.get('*', isProd 
   ? render
   : async (req, res) => {
     await onReady
